@@ -50,6 +50,38 @@ function getSelections() {
     return result;
 }
 
+function subjectOptions(sel)
+{
+    let options = [[]];
+
+    function add(type, teacherChoice, list)
+    {
+        if (!list || teacherChoice === "-")
+            return;
+
+        let newOptions = [];
+
+        list.forEach(t => {
+
+            if (teacherChoice !== "0" && teacherChoice !== t.nastavnik)
+                return;
+
+            options.forEach(o => {
+                newOptions.push([...o, {tip:type, termin:t}]);
+            });
+
+        });
+
+        options = newOptions;
+    }
+
+    add("p", sel.p, sel.predmet.p);
+    add("v", sel.v, sel.predmet.v);
+    add("k", sel.k, sel.predmet.k);
+
+    return options;
+}
+
 function slot(vreme) {
 
     let d = vreme.substring(0,3);
@@ -89,46 +121,36 @@ function addTermin(schedule, termin, predmet, tip) {
     return newSched;
 }
 
-function build(i, selections, schedule) {
+function subjectOptions(sel)
+{
+    let options = [[]];
 
-    if (i === selections.length) {
-
-        schedules.push(schedule);
-        return;
-    }
-
-    let sel = selections[i];
-
-    tryTip("p", sel.p, sel.predmet.p);
-    tryTip("v", sel.v, sel.predmet.v);
-    tryTip("k", sel.k, sel.predmet.k);
-
-    function tryTip(tip, teacherChoice, list) {
-
+    function add(type, teacherChoice, list)
+    {
         if (!list || teacherChoice === "-")
             return;
 
+        let newOptions = [];
+
         list.forEach(t => {
 
-            if (teacherChoice !== "0" &&
-                teacherChoice !== t.nastavnik)
+            if (teacherChoice !== "0" && teacherChoice !== t.nastavnik)
                 return;
 
-            if (conflict(schedule, t))
-                return;
+            options.forEach(o => {
+                newOptions.push([...o, {tip:type, termin:t}]);
+            });
 
-            let ns = addTermin(
-                schedule,
-                t,
-                sel.predmet.naziv,
-                tip
-            );
-
-            build(i+1, selections, ns);
         });
 
+        options = newOptions;
     }
 
+    add("p", sel.p, sel.predmet.p);
+    add("v", sel.v, sel.predmet.v);
+    add("k", sel.k, sel.predmet.k);
+
+    return options;
 }
 
 function generate() {
