@@ -94,7 +94,7 @@ int main() {
 
 
 
-    outFile = ofstream("out.json");
+    outFile = ofstream("timetable.json");
     if (!outFile.is_open()) {
         cerr << "Error: Unable to open the file." << endl;
         return 1;
