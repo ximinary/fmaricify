@@ -99,35 +99,69 @@ function build(i, selections, schedule) {
 
     let sel = selections[i];
 
-    tryTip("p", sel.p, sel.predmet.p);
-    tryTip("v", sel.v, sel.predmet.v);
-    tryTip("k", sel.k, sel.predmet.k);
+    let ns = schedule;
 
-    function tryTip(tip, teacherChoice, list) {
+    if (!sel.predmet.p || sel.p === "-")
+        return;
 
-        if (!list || teacherChoice === "-")
+        sel.predmet.p.forEach(t => {
+
+        if (sel.p !== "0" &&
+            sel.p !== t.nastavnik)
+        return;
+
+        if (conflict(ns, t))
             return;
 
-        list.forEach(t => {
+        ns = addTermin(
+            ns,
+            t,
+            sel.predmet.naziv,
+            "p"
+        );
+    });
 
-            if (teacherChoice !== "0" &&
-                teacherChoice !== t.nastavnik)
-                return;
+    if (!sel.predmet.v || sel.v === "-")
+        return;
 
-            if (conflict(schedule, t))
-                return;
+        sel.predmet.v.forEach(t => {
 
-            let ns = addTermin(
-                schedule,
-                t,
-                sel.predmet.naziv,
-                tip
-            );
+        if (sel.v !== "0" &&
+            sel.v !== t.nastavnik)
+        return;
 
-            build(i+1, selections, ns);
-        });
+        if (conflict(ns, t))
+            return;
 
-    }
+        ns = addTermin(
+            ns,
+            t,
+            sel.predmet.naziv,
+            "v"
+        );
+    });
+
+    if (!sel.predmet.k || sel.k === "-")
+        return;
+
+        sel.predmet.k.forEach(t => {
+
+        if (sel.k !== "0" &&
+            sel.k !== t.nastavnik)
+        return;
+
+        if (conflict(ns, t))
+            return;
+
+        ns = addTermin(
+            ns,
+            t,
+            sel.predmet.naziv,
+            "k"
+        );
+    });
+
+    build(i+1, selections, ns);
 
 }
 
