@@ -91,7 +91,7 @@ function addTermin(schedule, termin, predmet, tip) {
 
 function build(i, selections, schedule) {
 
-    if (i === 3 * selections.length) {
+    if (i === selections.length) {
 
         schedules.push(schedule);
         return;
@@ -99,12 +99,9 @@ function build(i, selections, schedule) {
 
     let sel = selections[i];
 
-    if (i % 3 === 0)
-        tryTip("p", sel.p, sel.predmet.p);
-    if (i % 3 === 1)
-        tryTip("v", sel.v, sel.predmet.v);
-    if (i % 3 === 2)
-        tryTip("k", sel.k, sel.predmet.k);
+    tryTip("p", sel.p, sel.predmet.p);
+    tryTip("v", sel.v, sel.predmet.v);
+    tryTip("k", sel.k, sel.predmet.k);
 
     function tryTip(tip, teacherChoice, list) {
 
