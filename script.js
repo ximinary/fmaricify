@@ -89,7 +89,7 @@ function addTermin(schedule, termin, predmet, tip) {
     return newSched;
 }
 
-function build(i, selections, schedule) {
+function build(i, selections, schedule, tip) {
 
     if (i === selections.length) {
 
@@ -99,9 +99,12 @@ function build(i, selections, schedule) {
 
     let sel = selections[i];
 
-    tryTip("p", sel.p, sel.predmet.p);
-    
-    tryTip("k", sel.k, sel.predmet.k);
+    if (tip === "p")
+        tryTip("p", sel.p, sel.predmet.p);
+    if (tip === "v")
+        tryTip("v", sel.v, sel.predmet.v);
+    if (tip === "k")
+        tryTip("k", sel.k, sel.predmet.k);
 
     function tryTip(tip, teacherChoice, list) {
 
@@ -125,11 +128,11 @@ function build(i, selections, schedule) {
             );
             
             if (tip === "p")
-                tryTip("v", teacherChoice, list);
+                build(i, selections, ns, "v");
             if (tip === "v")
-                tryTip("k", teacherChoice, list);
+                build(i, selections, ns, "k");
             if (tip === "k")
-                build(i+1, selections, ns);
+                build(i+1, selections, ns, "p");
         });
 
     }
@@ -142,7 +145,7 @@ function generate() {
 
     let selections = getSelections();
 
-    build(0, selections, new Map());
+    build(0, selections, new Map(), "p");
 
     showSchedules();
 }
