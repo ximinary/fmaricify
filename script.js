@@ -100,7 +100,7 @@ function build(i, selections, schedule) {
     let sel = selections[i];
 
     tryTip("p", sel.p, sel.predmet.p);
-    tryTip("v", sel.v, sel.predmet.v);
+    
     tryTip("k", sel.k, sel.predmet.k);
 
     function tryTip(tip, teacherChoice, list) {
@@ -123,8 +123,13 @@ function build(i, selections, schedule) {
                 sel.predmet.naziv,
                 tip
             );
-
-            build(i+1, selections, ns);
+            
+            if (tip === "p")
+                tryTip("v", teacherChoice, list);
+            if (tip === "v")
+                tryTip("k", teacherChoice, list);
+            if (tip === "k")
+                build(i+1, selections, ns);
         });
 
     }
