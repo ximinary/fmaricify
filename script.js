@@ -13,14 +13,12 @@ fetch("timetable.json")
 .then(r => r.json())
 .then(j => {
     data = j.predmeti;
-    console.log("JSON loaded");
 });
 
 function slot(vreme)
 {
     let d = vreme.substring(0,3);
     let h = parseInt(vreme.substring(3));
-
     return days[d]*100 + h;
 }
 
@@ -29,11 +27,8 @@ function conflict(schedule, termin)
     for (let t of termin.termini)
     {
         let s = slot(t.vreme);
-
-        if (schedule.has(s))
-            return true;
+        if (schedule.has(s)) return true;
     }
-
     return false;
 }
 
@@ -62,11 +57,11 @@ function getSelections()
 
     data.forEach(predmet => {
 
-        let checkbox =
-            document.querySelector("input[name=\"" + predmet.naziv + "_c\"]");
+        let c = document.querySelector(
+            "input[name=\"" + predmet.naziv + "_c\"]"
+        );
 
-        if (!checkbox || !checkbox.checked)
-            return;
+        if (!c || !c.checked) return;
 
         let p = document.querySelector(
             "select[name=\"" + predmet.naziv + "_p\"]"
@@ -80,61 +75,14 @@ function getSelections()
             "select[name=\"" + predmet.naziv + "_k\"]"
         )?.value;
 
-        result.push({
-            predmet,
-            p,
-            v,
-            k
-        });
+        result.push({ predmet, p, v, k });
 
     });
 
     return result;
 }
 
-function subjectOptions(sel)
-{
-    let options = [[]];
-
-    function process(type, teacherChoice, list)
-    {
-        if (!list) return;
-
-        if (teacherChoice === "-")
-            return;
-
-        let newOptions = [];
-
-        list.forEach(t => {
-
-            if (teacherChoice !== "0" &&
-                teacherChoice !== undefined &&
-                teacherChoice !== t.nastavnik)
-                return;
-
-            options.forEach(o => {
-                newOptions.push([...o,{
-                    tip:type,
-                    termin:t
-                }]);
-            });
-
-        });
-
-        options = newOptions;
-    }
-
-    process("p", sel.p, sel.predmet.p);
-    process("v", sel.v, sel.predmet.v);
-    process("k", sel.k, sel.predmet.k);
-
-    if (options.length === 0)
-        options = [[]];
-
-    return options;
-}
-
-function build(i, selections, schedule)
+function buildSubjects(i, selections, schedule)
 {
     if (i === selections.length)
     {
@@ -143,29 +91,42 @@ function build(i, selections, schedule)
     }
 
     let sel = selections[i];
-    let options = subjectOptions(sel);
 
-    options.forEach(opt => {
+    let activities = [];
 
-        let sched = new Map(schedule);
-        let bad = false;
+    if (sel.predmet.p && sel.p !== "-")
+        activities.push({tip:"p", list:sel.predmet.p, choice:sel.p});
 
-        opt.forEach(item => {
+    if (sel.predmet.v && sel.v !== "-")
+        activities.push({tip:"v", list:sel.predmet.v, choice:sel.v});
 
-            if (conflict(sched, item.termin))
-                bad = true;
-            else
-                sched = addTermin(
-                    sched,
-                    item.termin,
-                    sel.predmet.naziv,
-                    item.tip
-                );
+    if (sel.predmet.k && sel.k !== "-")
+        activities.push({tip:"k", list:sel.predmet.k, choice:sel.k});
 
-        });
+    buildActivities(0, activities, schedule, sel.predmet.naziv, selections, i);
+}
 
-        if (!bad)
-            build(i+1, selections, sched);
+function buildActivities(j, activities, schedule, predmet, selections, subjectIndex)
+{
+    if (j === activities.length)
+    {
+        buildSubjects(subjectIndex + 1, selections, schedule);
+        return;
+    }
+
+    let act = activities[j];
+
+    act.list.forEach(t => {
+
+        if (act.choice !== "0" && act.choice !== t.nastavnik)
+            return;
+
+        if (conflict(schedule, t))
+            return;
+
+        let ns = addTermin(schedule, t, predmet, act.tip);
+
+        buildActivities(j+1, activities, ns, predmet, selections, subjectIndex);
 
     });
 }
@@ -176,11 +137,7 @@ function generate()
 
     let selections = getSelections();
 
-    console.log("Selections:", selections);
-
-    build(0, selections, new Map());
-
-    console.log("Schedules:", schedules.length);
+    buildSubjects(0, selections, new Map());
 
     showSchedules();
 }
@@ -213,10 +170,9 @@ function showSchedules()
             let li = document.createElement("li");
 
             li.innerText =
-                v.predmet +
-                " (" + v.tip + ") " +
-                v.vreme +
-                " " + v.soba;
+                v.predmet + " (" + v.tip + ") " +
+                v.vreme + " " +
+                v.soba;
 
             list.appendChild(li);
         }
