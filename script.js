@@ -104,8 +104,8 @@ function build(i, selections, schedule) {
     if (sel.predmet.p && !sel.p === "-") {
         sel.predmet.p.forEach(t => {
 
-            if (sel.p === "0" ||
-                sel.p === t.nastavnik ||
+            if ((sel.p === "0" ||
+                sel.p === t.nastavnik) &&
                 !conflict(ns, t))
 
                 ns = addTermin(
@@ -120,8 +120,8 @@ function build(i, selections, schedule) {
     if (sel.predmet.v && !sel.v === "-") {
         sel.predmet.v.forEach(t => {
 
-            if (sel.v === "0" ||
-                sel.v === t.nastavnik ||
+            if ((sel.v === "0" ||
+                sel.v === t.nastavnik) &&
                 !conflict(ns, t))
                 
                 ns = addTermin(
@@ -136,8 +136,8 @@ function build(i, selections, schedule) {
     if (sel.predmet.k && !sel.k === "-") {
         sel.predmet.k.forEach(t => {
 
-            if (sel.k === "0" ||
-                sel.k === t.nastavnik ||
+            if ((sel.k === "0" ||
+                sel.k === t.nastavnik) &&
                 !conflict(ns, t))
                 
                 ns = addTermin(
