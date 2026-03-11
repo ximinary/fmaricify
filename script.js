@@ -13,7 +13,7 @@ fetch("timetable.json")
 .then(r => r.json())
 .then(j => {
     data = j.predmeti;
-    console.log("JSON loaded");
+    console.log("JSON loaded", data);
 });
 
 function slot(vreme)
@@ -48,6 +48,7 @@ function addTermin(schedule, termin, predmet, tip)
         ns.set(s,{
             predmet: predmet,
             tip: tip,
+            vreme: t.vreme,
             soba: t.soba
         });
     }
@@ -62,21 +63,21 @@ function getSelections()
     data.forEach(predmet => {
 
         let checkbox =
-            document.querySelector("input[name=\"" + predmet.naziv + "_c\"]");
+            document.querySelector(`input[name="${predmet.naziv}_c"]`);
 
         if (!checkbox || !checkbox.checked)
             return;
 
         let p = document.querySelector(
-            "select[name=\"" + predmet.naziv + "_p\"]"
+            `select[name="${predmet.naziv}_p"]`
         )?.value;
 
         let v = document.querySelector(
-            "select[name=\"" + predmet.naziv + "_v\"]"
+            `select[name="${predmet.naziv}_v"]`
         )?.value;
 
         let k = document.querySelector(
-            "select[name=\"" + predmet.naziv + "_k\"]"
+            `select[name="${predmet.naziv}_k"]`
         )?.value;
 
         result.push({
@@ -106,8 +107,8 @@ function subjectOptions(sel)
 
         list.forEach(t => {
 
-            if (teacherChoice !== "0" &&
-                teacherChoice !== undefined &&
+            if (teacherChoice &&
+                teacherChoice !== "0" &&
                 teacherChoice !== t.nastavnik)
                 return;
 
@@ -179,7 +180,7 @@ function generate()
 
     build(0, selections, new Map());
 
-    console.log("Schedules:", schedules.length);
+    console.log("Schedules found:", schedules.length);
 
     showSchedules();
 }
@@ -205,55 +206,20 @@ function showSchedules()
 
         div.appendChild(title);
 
-        div.appendChild(drawTable(s));
+        s.forEach(v => {
+
+            let p = document.createElement("p");
+
+            p.innerText =
+                v.predmet + " (" + v.tip + ") " +
+                v.vreme + " " +
+                v.soba;
+
+            div.appendChild(p);
+
+        });
 
         out.appendChild(div);
 
     });
-}
-
-function drawTable(schedule)
-{
-    let table = document.createElement("table");
-    table.border = "1";
-
-    let head = document.createElement("tr");
-
-    head.innerHTML =
-        "<th></th><th>Pon</th><th>Uto</th><th>Sre</th><th>Cet</th><th>Pet</th>";
-
-    table.appendChild(head);
-
-    for (let h=8; h<=20; h++)
-    {
-        let tr = document.createElement("tr");
-
-        let th = document.createElement("th");
-        th.innerText = h;
-
-        tr.appendChild(th);
-
-        for (let d=0; d<5; d++)
-        {
-            let td = document.createElement("td");
-
-            let key = d*100 + h;
-
-            if (schedule.has(key))
-            {
-                let v = schedule.get(key);
-
-                td.innerHTML =
-                    v.predmet +
-                    "<br>(" + v.tip + ")" +
-                    "<br>" + v.soba;
-            }
-
-            tr.appendChild(td);
-        }
-
-        table.appendChild(tr);
-    }
-
-    return table;
 }
