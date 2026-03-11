@@ -101,65 +101,53 @@ function build(i, selections, schedule) {
 
     let ns = schedule;
 
-    if (!sel.predmet.p || sel.p === "-")
-        return;
-
+    if (sel.predmet.p && !sel.p === "-") {
         sel.predmet.p.forEach(t => {
 
-        if (sel.p !== "0" &&
-            sel.p !== t.nastavnik)
-        return;
+            if (sel.p === "0" ||
+                sel.p === t.nastavnik ||
+                !conflict(ns, t))
 
-        if (conflict(ns, t))
-            return;
+                ns = addTermin(
+                    ns,
+                    t,
+                    sel.predmet.naziv,
+                    "p"
+                );
+        });
+    }
 
-        ns = addTermin(
-            ns,
-            t,
-            sel.predmet.naziv,
-            "p"
-        );
-    });
-
-    if (!sel.predmet.v || sel.v === "-")
-        return;
-
+    if (sel.predmet.v && !sel.v === "-") {
         sel.predmet.v.forEach(t => {
 
-        if (sel.v !== "0" &&
-            sel.v !== t.nastavnik)
-        return;
+            if (sel.v === "0" ||
+                sel.v === t.nastavnik ||
+                !conflict(ns, t))
+                
+                ns = addTermin(
+                    ns,
+                    t,
+                    sel.predmet.naziv,
+                    "v"
+                );
+        });
+    }
 
-        if (conflict(ns, t))
-            return;
-
-        ns = addTermin(
-            ns,
-            t,
-            sel.predmet.naziv,
-            "v"
-        );
-    });
-
-    if (!sel.predmet.k || sel.k === "-")
-        return;
-
+    if (sel.predmet.k && !sel.k === "-") {
         sel.predmet.k.forEach(t => {
 
-        if (sel.k !== "0" &&
-            sel.k !== t.nastavnik)
-        return;
-
-        if (conflict(ns, t))
-            return;
-
-        ns = addTermin(
-            ns,
-            t,
-            sel.predmet.naziv,
-            "k"
-        );
-    });
+            if (sel.k === "0" ||
+                sel.k === t.nastavnik ||
+                !conflict(ns, t))
+                
+                ns = addTermin(
+                    ns,
+                    t,
+                    sel.predmet.naziv,
+                    "k"
+                );
+        });
+    }
 
     build(i+1, selections, ns);
 
