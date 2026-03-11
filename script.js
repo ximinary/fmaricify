@@ -13,7 +13,7 @@ fetch("timetable.json")
 .then(r => r.json())
 .then(j => {
     data = j.predmeti;
-    console.log("JSON loaded", data);
+    console.log("JSON loaded");
 });
 
 function slot(vreme)
@@ -63,21 +63,21 @@ function getSelections()
     data.forEach(predmet => {
 
         let checkbox =
-            document.querySelector(`input[name="${predmet.naziv}_c"]`);
+            document.querySelector("input[name=\"" + predmet.naziv + "_c\"]");
 
         if (!checkbox || !checkbox.checked)
             return;
 
         let p = document.querySelector(
-            `select[name="${predmet.naziv}_p"]`
+            "select[name=\"" + predmet.naziv + "_p\"]"
         )?.value;
 
         let v = document.querySelector(
-            `select[name="${predmet.naziv}_v"]`
+            "select[name=\"" + predmet.naziv + "_v\"]"
         )?.value;
 
         let k = document.querySelector(
-            `select[name="${predmet.naziv}_k"]`
+            "select[name=\"" + predmet.naziv + "_k\"]"
         )?.value;
 
         result.push({
@@ -107,8 +107,8 @@ function subjectOptions(sel)
 
         list.forEach(t => {
 
-            if (teacherChoice &&
-                teacherChoice !== "0" &&
+            if (teacherChoice !== "0" &&
+                teacherChoice !== undefined &&
                 teacherChoice !== t.nastavnik)
                 return;
 
@@ -180,7 +180,7 @@ function generate()
 
     build(0, selections, new Map());
 
-    console.log("Schedules found:", schedules.length);
+    console.log("Schedules:", schedules.length);
 
     showSchedules();
 }
@@ -206,18 +206,22 @@ function showSchedules()
 
         div.appendChild(title);
 
-        s.forEach(v => {
+        let list = document.createElement("ul");
 
-            let p = document.createElement("p");
+        for (let [k,v] of s)
+        {
+            let li = document.createElement("li");
 
-            p.innerText =
-                v.predmet + " (" + v.tip + ") " +
-                v.vreme + " " +
-                v.soba;
+            li.innerText =
+                v.predmet +
+                " (" + v.tip + ") " +
+                v.vreme +
+                " " + v.soba;
 
-            div.appendChild(p);
+            list.appendChild(li);
+        }
 
-        });
+        div.appendChild(list);
 
         out.appendChild(div);
 
