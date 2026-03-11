@@ -19,6 +19,7 @@ function slot(vreme)
 {
     let d = vreme.substring(0,3);
     let h = parseInt(vreme.substring(3));
+
     return days[d]*100 + h;
 }
 
@@ -27,8 +28,11 @@ function conflict(schedule, termin)
     for (let t of termin.termini)
     {
         let s = slot(t.vreme);
-        if (schedule.has(s)) return true;
+
+        if (schedule.has(s))
+            return true;
     }
+
     return false;
 }
 
@@ -43,7 +47,6 @@ function addTermin(schedule, termin, predmet, tip)
         ns.set(s,{
             predmet: predmet,
             tip: tip,
-            vreme: t.vreme,
             soba: t.soba
         });
     }
@@ -58,31 +61,75 @@ function getSelections()
     data.forEach(predmet => {
 
         let c = document.querySelector(
-            "input[name=\"" + predmet.naziv + "_c\"]"
+            "input[name='" + predmet.naziv + "_c']"
         );
 
-        if (!c || !c.checked) return;
+        if (!c || !c.checked)
+            return;
 
         let p = document.querySelector(
-            "select[name=\"" + predmet.naziv + "_p\"]"
+            "select[name='" + predmet.naziv + "_p']"
         )?.value;
 
         let v = document.querySelector(
-            "select[name=\"" + predmet.naziv + "_v\"]"
+            "select[name='" + predmet.naziv + "_v']"
         )?.value;
 
         let k = document.querySelector(
-            "select[name=\"" + predmet.naziv + "_k\"]"
+            "select[name='" + predmet.naziv + "_k']"
         )?.value;
 
-        result.push({ predmet, p, v, k });
+        result.push({
+            predmet,
+            p,
+            v,
+            k
+        });
 
     });
 
     return result;
 }
 
-function buildSubjects(i, selections, schedule)
+function subjectOptions(sel)
+{
+    let options = [[]];
+
+    function add(type, teacherChoice, list)
+    {
+        if (!list || teacherChoice === "-")
+            return;
+
+        let newOptions = [];
+
+        list.forEach(t => {
+
+            if (teacherChoice !== "0" &&
+                teacherChoice !== t.nastavnik)
+                return;
+
+            options.forEach(o => {
+                newOptions.push([...o,{tip:type,termin:t}]);
+            });
+
+        });
+
+        options = newOptions;
+    }
+
+    add("p", sel.p, sel.predmet.p);
+    add("v", sel.v, sel.predmet.v);
+    add("k", sel.k, sel.predmet.k);
+
+    if (options.length === 0)
+        options = [[]];
+
+    return options;
+}
+
+
+
+function build(i, selections, schedule)
 {
     if (i === selections.length)
     {
@@ -91,42 +138,29 @@ function buildSubjects(i, selections, schedule)
     }
 
     let sel = selections[i];
+    let options = subjectOptions(sel);
 
-    let activities = [];
+    options.forEach(opt => {
 
-    if (sel.predmet.p && sel.p !== "-")
-        activities.push({tip:"p", list:sel.predmet.p, choice:sel.p});
+        let sched = new Map(schedule);
+        let bad = false;
 
-    if (sel.predmet.v && sel.v !== "-")
-        activities.push({tip:"v", list:sel.predmet.v, choice:sel.v});
+        opt.forEach(item => {
 
-    if (sel.predmet.k && sel.k !== "-")
-        activities.push({tip:"k", list:sel.predmet.k, choice:sel.k});
+            if (conflict(sched, item.termin))
+                bad = true;
+            else
+                sched = addTermin(
+                    sched,
+                    item.termin,
+                    sel.predmet.naziv,
+                    item.tip
+                );
 
-    buildActivities(0, activities, schedule, sel.predmet.naziv, selections, i);
-}
+        });
 
-function buildActivities(j, activities, schedule, predmet, selections, subjectIndex)
-{
-    if (j === activities.length)
-    {
-        buildSubjects(subjectIndex + 1, selections, schedule);
-        return;
-    }
-
-    let act = activities[j];
-
-    act.list.forEach(t => {
-
-        if (act.choice !== "0" && act.choice !== t.nastavnik)
-            return;
-
-        if (conflict(schedule, t))
-            return;
-
-        let ns = addTermin(schedule, t, predmet, act.tip);
-
-        buildActivities(j+1, activities, ns, predmet, selections, subjectIndex);
+        if (!bad)
+            build(i+1, selections, sched);
 
     });
 }
@@ -137,7 +171,7 @@ function generate()
 
     let selections = getSelections();
 
-    buildSubjects(0, selections, new Map());
+    build(0, selections, new Map());
 
     showSchedules();
 }
@@ -163,23 +197,55 @@ function showSchedules()
 
         div.appendChild(title);
 
-        let list = document.createElement("ul");
-
-        for (let [k,v] of s)
-        {
-            let li = document.createElement("li");
-
-            li.innerText =
-                v.predmet + " (" + v.tip + ") " +
-                v.vreme + " " +
-                v.soba;
-
-            list.appendChild(li);
-        }
-
-        div.appendChild(list);
+        div.appendChild(drawTable(s));
 
         out.appendChild(div);
 
     });
+}
+
+function drawTable(schedule)
+{
+    let table = document.createElement("table");
+    table.border = "1";
+
+    let head = document.createElement("tr");
+
+    head.innerHTML =
+        "<th></th><th>Pon</th><th>Uto</th><th>Sre</th><th>Cet</th><th>Pet</th>";
+
+    table.appendChild(head);
+
+    for (let h=8; h<=20; h++)
+    {
+        let tr = document.createElement("tr");
+
+        let th = document.createElement("th");
+        th.innerText = h;
+
+        tr.appendChild(th);
+
+        for (let d=0; d<5; d++)
+        {
+            let td = document.createElement("td");
+
+            let key = d*100 + h;
+
+            if (schedule.has(key))
+            {
+                let v = schedule.get(key);
+
+                td.innerHTML =
+                    v.predmet +
+                    "<br>(" + v.tip + ")" +
+                    "<br>" + v.soba;
+            }
+
+            tr.appendChild(td);
+        }
+
+        table.appendChild(tr);
+    }
+
+    return table;
 }
