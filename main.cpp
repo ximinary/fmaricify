@@ -10,7 +10,7 @@ using namespace std;
 
 
 int main() {
-    ifstream inFile("/home/ximinary/Desktop/python venv/output.txt");
+    ifstream inFile("parsed.txt");
     if (!inFile.is_open()) {
         cerr << "Nema fajla" << endl;
         return 1;
@@ -84,8 +84,6 @@ int main() {
     }
 
     outFile << "</table>" << endl;
-    outFile << "<br>" << endl;
-    outFile << "<button onclick=\"generate()\">ГЕНЕРИШИ РАСПОРЕД</button>" << endl;
     outFile << "<br>" << endl;
     outFile << "<button type=\"submit\">ГЕНЕРИШИ РАСПОРЕД!</button>" << endl;
     outFile << "</form>" << endl;
