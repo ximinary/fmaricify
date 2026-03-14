@@ -67,7 +67,8 @@ int main() {
         cerr << "Error: Unable to open the file." << endl;
         return 1;
     }
-
+    
+    outFile << "<form method=\"POST\" action=\"/generate\">" << endl;
     outFile << "<table border=\"1\">" << endl;
     outFile << "<tr>" << endl;
     outFile << "<th>Предмет</th>" << endl;
@@ -86,8 +87,8 @@ int main() {
     outFile << "<br>" << endl;
     outFile << "<button onclick=\"generate()\">ГЕНЕРИШИ РАСПОРЕД</button>" << endl;
     outFile << "<br>" << endl;
-    outFile << "<div id=\"results\"></div>" << endl;
-    outFile << "<script src=\"script.js\"></script>" << endl;
+    outFile << "<button type=\"submit\">ГЕНЕРИШИ РАСПОРЕД!</button>" << endl;
+    outFile << "</form>" << endl;
 
     outFile.close();
 
